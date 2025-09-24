@@ -25,13 +25,6 @@ const highlights = [
   },
 ];
 
-// const metrics = [
-//   { value: 3, suffix: '+', label: 'Years Experience' },
-//   { value: 50, suffix: '+', label: 'Systems Built' },
-//   { value: 99.9, suffix: '%', label: 'Uptime Achieved' },
-//   { value: 15, suffix: '+', label: 'Teams Led' },
-// ];
-
 const metrics = [
   { value: 3, suffix: '+', label: 'Years Experience' },
   { value: 40, suffix: '%', label: 'Manual Reporting Reduced' },
