@@ -198,7 +198,7 @@ export const Projects = () => {
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex flex-col sm:flex-row gap-3">
+                      {/* <div className="flex flex-col sm:flex-row gap-3">
                         {project.links.demo && (
                           <Button
                             variant="default"
@@ -222,7 +222,7 @@ export const Projects = () => {
                             Source Code
                           </Button>
                         )}
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </motion.div>
