@@ -34,9 +34,10 @@ export const Footer = () => {
             transition={{ duration: 0.6 }}
             className="text-center md:text-left"
           >
-            <h3 className="text-2xl font-bold gradient-text mb-4">
-              Kartheek Analytics
+            <h3 className="text-3xl font-bold gradient-text mb-4">
+              Kartheek Kumar
             </h3>
+            <p className="text-sm">Data Analyst & Data Engineer</p>
             <p className="text-muted-foreground text-sm">
               © {currentYear} Kartheek Kumar Sarma Mokshagundam.
               <br />
