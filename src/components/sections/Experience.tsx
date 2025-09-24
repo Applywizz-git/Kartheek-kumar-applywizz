@@ -25,7 +25,7 @@ export const Experience = () => {
           </h2>
           <div className="w-24 h-1 bg-gradient-primary mx-auto mb-8" />
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            12+ years of building scalable software solutions and leading engineering teams
+            3+ years of building scalable software solutions and leading engineering teams
           </p>
         </motion.div>
 
