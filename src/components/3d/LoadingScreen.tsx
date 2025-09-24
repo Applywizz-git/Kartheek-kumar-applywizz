@@ -3,17 +3,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useProgress } from '@react-three/drei';
 
 const technologies = [
-  'Power BI', 'Tableau', 'SQL', 'Python', 'Snowflake', 'Azure', 
+  'Power BI', 'Tableau', 'SQL', 'Python', 'Snowflake', 'Azure',
   'Excel', 'DAX', 'Alteryx', 'BigQuery'
 ];
 
 export const LoadingScreen = () => {
-  const { progress } = useProgress();
+  // CHANGED: also read active/loaded/total so we can detect "no assets"
+  const { progress, active, total } = useProgress();
+
   const [displayName, setDisplayName] = useState('');
   const [showLoading, setShowLoading] = useState(true);
   const [currentLangIndex, setCurrentLangIndex] = useState(0);
-  
-  const fullName = "Kartheek Analytics";
+
+  // NEW: UI-driven progress that smoothly follows loader progress
+  const [uiProgress, setUiProgress] = useState(0);
+
+  const fullName = "Kartheek Kumar";
 
   // Typewriter effect for name
   useEffect(() => {
@@ -25,29 +30,47 @@ export const LoadingScreen = () => {
     }
   }, [displayName, fullName]);
 
-  // Cycle through languages
+  // NEW: rotate "technologies" line every 600ms
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentLangIndex((prev) => (prev + 1) % technologies.length);
-    }, 800);
-    return () => clearInterval(interval);
+    const id = setInterval(() => {
+      setCurrentLangIndex(i => (i + 1) % technologies.length);
+    }, 600);
+    return () => clearInterval(id);
   }, []);
 
-  // Auto-hide after timeout
+  // CHANGED: drive a smooth UI progress and handle "no assets" case
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setShowLoading(false);
-    }, 2500);
+    let raf: number;
+    const animate = () => {
+      setUiProgress(prev => {
+        const target = total === 0 ? 100 : progress; // if nothing to load, go to 100
+        const delta = target - prev;
+        // ease toward the target
+        const step = Math.sign(delta) * Math.max(0.5, Math.abs(delta) * 0.15);
+        const next = prev + step;
+        // snap if close
+        if (Math.abs(target - next) < 0.5) return target;
+        raf = requestAnimationFrame(animate);
+        return Math.min(100, Math.max(0, next));
+      });
+    };
+    raf = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(raf);
+  }, [progress, total]);
+
+  // CHANGED: auto-hide when UI progress completes OR after a max timeout
+  useEffect(() => {
+    if (uiProgress >= 100 && !active) {
+      const t = setTimeout(() => setShowLoading(false), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [uiProgress, active]);
+
+  // keep a hard cap so it doesn’t hang forever (safety net)
+  useEffect(() => {
+    const timeout = setTimeout(() => setShowLoading(false), 4000);
     return () => clearTimeout(timeout);
   }, []);
-
-  // Hide when fully loaded
-  useEffect(() => {
-    if (progress >= 100) {
-      const timeout = setTimeout(() => setShowLoading(false), 500);
-      return () => clearTimeout(timeout);
-    }
-  }, [progress]);
 
   return (
     <AnimatePresence>
@@ -55,7 +78,7 @@ export const LoadingScreen = () => {
         <motion.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-background"
           aria-live="polite"
           aria-label="Loading application"
@@ -74,46 +97,7 @@ export const LoadingScreen = () => {
                 className="inline-block w-1 h-20 bg-primary ml-2 align-top"
               />
             </motion.h1>
-
-            {/* Language Ring */}
-            <div className="relative mb-12 h-24 flex items-center justify-center">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="relative w-80 h-80"
-              >
-                {technologies.map((tech, index) => {
-                  const angle = (index / technologies.length) * 360;
-                  const isActive = index === currentLangIndex;
-                  
-                  return (
-                    <motion.div
-                      key={tech}
-                      className="absolute top-1/2 left-1/2 origin-[0_140px]"
-                      style={{
-                        transform: `translate(-50%, -50%) rotate(${angle}deg)`,
-                      }}
-                      animate={{
-                        scale: isActive ? 1.2 : 1,
-                        opacity: isActive ? 1 : 0.6,
-                      }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <div
-                        className={`px-4 py-2 rounded-full text-sm font-medium ${
-                          isActive 
-                            ? 'bg-primary text-primary-foreground glow' 
-                            : 'bg-card text-card-foreground border border-border'
-                        }`}
-                        style={{ transform: `rotate(-${angle}deg)` }}
-                      >
-                        {tech}
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
-            </div>
+            <p className='text-2xl md:text-3xl font-semibold mb-4'> Data Analyst & Data Engineer</p>
 
             {/* Progress Bar */}
             <div className="w-80 mx-auto mb-6">
@@ -121,17 +105,19 @@ export const LoadingScreen = () => {
                 <span className="text-sm text-muted-foreground">
                   Loading • {technologies[currentLangIndex]}
                 </span>
+                {/* CHANGED: show UI progress */}
                 <span className="text-sm font-mono text-primary">
-                  {Math.round(progress)}%
+                  {Math.round(uiProgress)}%
                 </span>
               </div>
-              
+
               <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                {/* CHANGED: animate width using UI progress */}
                 <motion.div
                   className="h-full bg-gradient-primary rounded-full"
                   initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  animate={{ width: `${uiProgress}%` }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
                 />
               </div>
             </div>
